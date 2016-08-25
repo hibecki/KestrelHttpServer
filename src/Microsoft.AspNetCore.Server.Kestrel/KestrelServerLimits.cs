@@ -7,6 +7,9 @@ namespace Microsoft.AspNetCore.Server.Kestrel
 {
     public class KestrelServerLimits
     {
+        // Matches the non-configurable default response buffer size for Kestrel in 1.0.0
+        private long? _maxResponseBufferSize = 64 * 1024;
+
         // Matches the default client_max_body_size in nginx.  Also large enough that most requests
         // should be under the limit.
         private long? _maxRequestBufferSize = 1024 * 1024;
@@ -19,6 +22,30 @@ namespace Microsoft.AspNetCore.Server.Kestrel
 
         // Matches the default LimitRequestFields in Apache httpd.
         private int _maxRequestHeaderCount = 100;
+
+        /// <summary>
+        /// Gets or sets the maximum size of the response buffer before calls
+        /// write calls begin to block or return incomplete tasks.
+        /// </summary>
+        /// <remarks>
+        /// When set to null, the size of the response buffer is unlimited.
+        /// Defaults to 65536 bytes (64 KB).
+        /// </remarks>
+        public long? MaxResponseBufferSize
+        {
+            get
+            {
+                return _maxResponseBufferSize;
+            }
+            set
+            {
+                if (value.HasValue && value.Value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "Value must be null or a non-negative integer.");
+                }
+                _maxResponseBufferSize = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the maximum size of the request buffer.
